@@ -1,0 +1,82 @@
+<?php
+
+/**
+ * Implements hook_install().
+ */
+function biblio_install() {
+  if (module_exists('taxonomy')) {
+    _create_taxonomy();
+    _create_field();
+  }
+}
+
+/**
+ * Create a taxonomy.
+ */
+function _create_taxonomy() {
+  $t = get_t();
+
+  $term = new stdClass();
+  $term->name = $t('Bibliography');
+  $term->machine_name = 'bibliography';
+  $term->description = $t('Vocabulary for footnotes');
+  $term->heirarchy = 1;
+  $term->module = 'biblio';
+  $term->weight = 1;
+  taxonomy_vocabulary_save($term);
+}
+
+/**
+ * Create a field.
+ */
+function _create_field() {
+  $t = get_t();
+
+  $field = array(
+    'field_name' => 'field_biblio_node_id',
+    'label' => $t('Node id'),
+    'cardinality' => -1,
+    'type' => 'number_integer',
+    'module' => 'number',
+    'settings' => array(),
+  );
+
+  if (!field_info_field($field['field_name'])) {
+    field_create_field($field);
+  }
+
+  $instance = array(
+    'required' => 1,
+    'field_name' => 'field_biblio_node_id',
+    'entity_type' => 'taxonomy_term',
+    'bundle' => 'bibliography',
+    'label' => $t('Node id'),
+    'cardinality' => 1,
+    'required' => 1,
+    'widget' => array(
+      'type' => 'number',
+      'module' => 'number',
+      'settings' => array('size' => 60),
+    ),
+    'weight' => 20,
+  );
+
+  // Check if instance exists
+  if (!field_info_instance($instance['entity_type'], $instance['field_name'], $instance['bundle'])) {
+    field_create_instance($instance);
+  }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function biblio_uninstall() {
+  //Delete Bibliography vocabulary
+  if ($vocabulary = taxonomy_vocabulary_machine_name_load('bibliography')) {
+    taxonomy_vocabulary_delete($vocabulary->vid);
+  }
+  //Delete field
+  if (field_info_field('field_biblio_node_id')) {
+    field_delete_field('field_biblio_node_id');
+  }
+}

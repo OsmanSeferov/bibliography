@@ -1,0 +1,9 @@
+name = Bibliography
+description = Allow create footnotes with bibliography pages.
+package = Bibliography
+core = 7.x
+version = 7.x-1.0
+dependencies[] = panels
+dependencies[] = taxonomy
+configure = admin/config/content/biblio
+
